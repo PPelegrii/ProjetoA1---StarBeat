@@ -43,7 +43,7 @@ fun LoginScreen(
     LaunchedEffect(uiState.loginSuccess) {
         if (uiState.loginSuccess) {
             onLoginSuccess()
-            viewModel.resetState() // Reseta o estado após a navegação
+            viewModel.resetState()
         }
     }
 
@@ -84,7 +84,6 @@ fun LoginScreen(
         } else {
             Button(
                 onClick = {
-                    // Simplificação: usando senha como hash
                     if (isRegisterMode) {
                         viewModel.register(username, password)
                     } else {

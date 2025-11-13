@@ -25,30 +25,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 
-/**
- * Diálogo para editar o BPM e o status de favorito de uma música.
- * Demonstra o requisito CRUD 'Update'.
- *
- * @param song A entidade SongEntity atual a ser editada.
- * @param onDismiss Callback para fechar o diálogo.
- * @param onUpdate Callback chamado com a SongEntity atualizada para salvar no Room.
- * @param onDelete Callback para deletar a música.
- * @param toggleFavorite Opcional: callback para alternar favorito diretamente (default: no-op).
- */
 @Composable
 fun EditSongDialog(
     song: SongEntity,
     onDismiss: () -> Unit,
     onUpdate: (SongEntity) -> Unit,
     onDelete: (SongEntity) -> Unit,
-    toggleFavorite: (SongEntity) -> Unit = {} // parâmetro opcional adicionado
+    toggleFavorite: (SongEntity) -> Unit = {}
 ) {
-    // Estado local para o novo BPM, inicializado com o valor atual
     var newBpm by remember { mutableStateOf(song.bpm.toString()) }
-    // Estado local para o favorito
     var isFavorite by remember { mutableStateOf(song.isFavorite) }
-
-    // Verificação de erro para o BPM
     val isBpmValid = newBpm.toIntOrNull() != null && newBpm.toInt() in 50..300
 
     AlertDialog(
@@ -61,7 +47,6 @@ fun EditSongDialog(
                 )
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Campo para Edição do BPM
                 TextField(
                     value = newBpm,
                     onValueChange = { newBpm = it.filter { char -> char.isDigit() } }, // Aceita apenas dígitos
@@ -80,7 +65,6 @@ fun EditSongDialog(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Switch para Favorito (Exemplo simples de Update)
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
@@ -94,7 +78,7 @@ fun EditSongDialog(
                 }
                 Button(
                     onClick = {
-                        onDelete(song) // Chama o ViewModel para persistir
+                        onDelete(song)
                     },
                 ) { Text("Deletar Música") }
             }
@@ -113,7 +97,7 @@ fun EditSongDialog(
                         }
                     }
                 },
-                enabled = isBpmValid // Só habilita se o BPM for válido
+                enabled = isBpmValid
             ) {
                 Text("Salvar Alterações")
             }

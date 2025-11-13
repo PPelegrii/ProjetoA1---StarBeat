@@ -12,8 +12,8 @@ import kotlinx.coroutines.launch
 data class AddMusicUiState(
     val title: String = "",
     val artist: String = "",
-    val bpm: String = "", // BPM como String para o TextField
-    val audioUri: String? = null, // URI selecionada
+    val bpm: String = "",
+    val audioUri: String? = null,
     val isLoading: Boolean = false,
     val error: String? = null,
     val saveSuccess: Boolean = false
@@ -60,7 +60,7 @@ class AddMusicViewModel(
 
             try {
                 repository.saveLocalSong(state.title, state.artist, bpmInt, state.audioUri)
-                _uiState.value = AddMusicUiState(saveSuccess = true) // Reseta o formulário
+                _uiState.value = AddMusicUiState(saveSuccess = true)
             } catch (e: Exception) {
                 _uiState.update { it.copy(isLoading = false, error = e.message) }
             }

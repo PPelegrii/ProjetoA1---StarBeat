@@ -14,7 +14,6 @@ class ProfileViewModel(
     private val repository: GameRepository
 ) : ViewModel() {
 
-    // Expõe os placares do usuário logado
     val highScores: StateFlow<List<ScoreEntity>> = repository.highScores
         .stateIn(
             scope = viewModelScope,
@@ -22,7 +21,6 @@ class ProfileViewModel(
             initialValue = emptyList()
         )
 
-    // Expõe as músicas favoritas do usuário logado
     val favoriteSongs: StateFlow<UserWithFavoriteSongs?> = repository.getFavoriteSongs()
         .stateIn(
             scope = viewModelScope,

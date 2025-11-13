@@ -48,9 +48,6 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import android.widget.Toast
 
-/**
- * Tela principal: Biblioteca de Músicas e Placar.
- */
 @Composable
 fun LibraryScreen(
     viewModel: LibraryViewModel,
@@ -61,28 +58,25 @@ fun LibraryScreen(
     val highScores = uiState.highScores
     val context = LocalContext.current
 
-    // show error toasts
     LaunchedEffect(uiState.error) {
         uiState.error?.let { msg ->
             Toast.makeText(context, msg, Toast.LENGTH_LONG).show()
         }
     }
 
-    // ESTADO PARA O DIÁLOGO: Controla qual SongEntity deve ser editada (ou null)
     var songToEdit by remember { mutableStateOf<SongEntity?>(null) }
 
-    // RENDERIZAÇÃO CONDICIONAL DO DIÁLOGO
     songToEdit?.let { song ->
         EditSongDialog(
             song = song,
             onDismiss = { songToEdit = null },
             onUpdate = { updatedSong ->
-                viewModel.updateSong(updatedSong) // Persiste as mudanças
-                songToEdit = null // Fecha o diálogo após o salvamento
+                viewModel.updateSong(updatedSong) 
+                songToEdit = null 
             },
             onDelete = { updatedSong ->
-                viewModel.deleteSong(updatedSong) // Persiste as mudanças
-                songToEdit = null // Fecha o diálogo após o salvamento
+                viewModel.deleteSong(updatedSong) 
+                songToEdit = null 
             },
             toggleFavorite = { s -> viewModel.toggleFavorite(s.songId) }
         )
@@ -94,14 +88,13 @@ fun LibraryScreen(
             .background(Color(0xFFEFEFEF))
             .padding(16.dp)
     ) {
-        // --- 1. Título e Sincronização ---
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "Biblioteca de Batidas",
+                text = "Biblioteca de Musicas",
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold
             )
@@ -116,7 +109,6 @@ fun LibraryScreen(
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        // Exibição de Erros (agora via Toast)
         if (uiState.error != null) {
             Text(
                 text = "ERRO: ${uiState.error}",
@@ -124,8 +116,7 @@ fun LibraryScreen(
                 modifier = Modifier.padding(bottom = 8.dp)
             )
         }
-
-        // --- 2. Recordes (High Scores) ---
+-
         HighScorePanel(
             highScores = highScores,
             onClearScores = { viewModel.clearScores() }
@@ -133,7 +124,6 @@ fun LibraryScreen(
 
         HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp))
 
-        // --- 3. Lista de Músicas ---
         Text(
             text = "Selecione uma Música para Jogar:",
             style = MaterialTheme.typography.titleMedium,
@@ -155,7 +145,7 @@ fun LibraryScreen(
                     SongListItem(
                         song = song,
                         onPlay = onSongSelected,
-                        onEdit = { songToEdit = song }, // Ação: Abre o diálogo
+                        onEdit = { songToEdit = song },
                         onToggleFavorite = { viewModel.toggleFavorite(song.songId) }
                     )
                 }
@@ -165,7 +155,10 @@ fun LibraryScreen(
 }
 
 @Composable
-private fun HighScorePanel(highScores: List<ScoreEntity>, onClearScores: () -> Unit) {
+private fun HighScorePanel(
+    highScores: List<ScoreEntity>,
+    onClearScores: () -> Unit
+) {
     Card(
         modifier = Modifier.fillMaxWidth(),
     ) {
@@ -230,7 +223,6 @@ private fun SongListItem(
             )
         }
 
-        // Favorito: mostra ícone preenchido se isFavorite == true, senão o contorno
         IconButton(onClick = onToggleFavorite) {
             if (song.isFavorite) {
                 Icon(Icons.Default.Favorite, contentDescription = "Favorito", tint = Color.Red)
@@ -239,7 +231,6 @@ private fun SongListItem(
             }
         }
 
-        // Botão de Edição que chama o onEdit
         IconButton(onClick = onEdit) {
             Icon(
                 imageVector = Icons.Default.Edit,

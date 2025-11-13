@@ -23,7 +23,6 @@ class AuthViewModel(
     private val _uiState = MutableStateFlow(AuthUiState())
     val uiState: StateFlow<AuthUiState> = _uiState.asStateFlow()
 
-    // Expõe o ID do usuário logado para o AuthLoadingScreen
     val loggedInUserId: Flow<Int?> = repository.currentUserId
 
     fun login(username: String, passwordHash: String) {

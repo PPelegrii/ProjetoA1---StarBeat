@@ -30,7 +30,6 @@ data class UserSongFavoriteCrossRef(
     @ColumnInfo(name = "song_id") val songId: String
 )
 
-// Classe POJO para buscar os favoritos de um usuário
 data class UserWithFavoriteSongs(
     @Embedded val user: UserEntity,
     @Relation(

@@ -17,10 +17,6 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 
-/**
- * Simple BottomBar for the app with Library, Add Music and Profile items.
- * It detects the current route from the NavController and performs navigation.
- */
 @Composable
 fun BottomBar(
     navController: NavHostController,
@@ -46,17 +42,15 @@ fun BottomBar(
                 onClick = {
                     val targetRoute = when (screen) {
                         is Screen.Profile -> {
-                            // Fill user id if available, otherwise use 0
                             val id = currentUserId ?: 0
                             screen.createRoute(id)
                         }
                         else -> screen.route
                     }
-                    // Standard singleTop/navigation options to avoid multiple copies
                     navController.navigate(targetRoute) {
                         launchSingleTop = true
                         restoreState = true
-                        // Pop up to the start destination to keep back stack clean
+
                         navController.graph.startDestinationRoute?.let { startRoute ->
                             popUpTo(startRoute) { saveState = true }
                         }

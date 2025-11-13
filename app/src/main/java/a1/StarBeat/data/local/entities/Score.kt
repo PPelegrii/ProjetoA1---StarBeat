@@ -5,11 +5,6 @@ import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
 
-/**
- * Entidade B (Placar):
- * Armazena o histórico de pontuação.
- * Usamos ForeignKey para ligar o placar à música jogada.
- */
 @Entity(
     tableName = "scores",
     primaryKeys = ["user_id", "song_id"],

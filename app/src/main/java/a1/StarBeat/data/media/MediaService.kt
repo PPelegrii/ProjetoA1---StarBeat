@@ -19,15 +19,13 @@ interface MediaService {
 
 class ExoPlayerMediaService(context: Context) : MediaService {
 
-    // Instancia o ExoPlayer
     private val player = ExoPlayer.Builder(context).build()
     private var mediaListener: MediaListener? = null
 
     init {
-        // Adiciona um listener nativo do ExoPlayer para capturar eventos
         player.addListener(object : Player.Listener {
             override fun onPlaybackStateChanged(playbackState: Int) {
-                // Se o estado for STATE_ENDED, a música acabou
+
                 if (playbackState == Player.STATE_ENDED) {
                     mediaListener?.onPlaybackEnded()
                 }
@@ -60,7 +58,6 @@ class ExoPlayerMediaService(context: Context) : MediaService {
     }
 
     override fun release() {
-        // Libera os recursos do player quando não for mais necessário
         player.release()
     }
 

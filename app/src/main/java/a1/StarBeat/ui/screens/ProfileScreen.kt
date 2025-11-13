@@ -60,7 +60,6 @@ fun ProfileScreen(
             Spacer(Modifier.height(24.dp))
         }
 
-        // --- Seção de Placares ---
         item {
             Card(modifier = Modifier.fillMaxWidth()) {
                 Column(modifier = Modifier.padding(12.dp)) {
@@ -87,7 +86,6 @@ fun ProfileScreen(
             Spacer(Modifier.height(16.dp))
         }
 
-        // --- Seção de Favoritos ---
         item {
             Text(
                 text = "Músicas Favoritas",

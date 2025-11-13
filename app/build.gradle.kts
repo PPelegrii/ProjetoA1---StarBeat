@@ -1,37 +1,3 @@
-import java.util.Properties
-
-var jamendoClientId: String? = null
-
-if (project.hasProperty("JAMENDO_CLIENT_ID")) {
-    jamendoClientId = project.property("JAMENDO_CLIENT_ID").toString()
-}
-
-// 2) se não, tenta ler variável de ambiente
-if (jamendoClientId == null || jamendoClientId.toString().isEmpty()) {
-    val envVal = System.getenv("JAMENDO_CLIENT_ID")
-    if (envVal != null && envVal.isNotEmpty()) {
-        jamendoClientId = envVal
-    }
-}
-
-// 3) se ainda não achou, tenta ler local.properties
-if (jamendoClientId == null || jamendoClientId.toString().isEmpty()) {
-    val localPropsFile = rootProject.file("local.properties")
-    if (localPropsFile.exists()) {
-        val props = Properties()
-        localPropsFile.inputStream().use { stream -> props.load(stream) }
-        if (props["JAMENDO_CLIENT_ID"] != null) {
-            jamendoClientId = props["JAMENDO_CLIENT_ID"].toString()
-        }
-    }
-}
-// 4) literalmente se mata
-if (jamendoClientId == null || jamendoClientId.toString().isEmpty()) {
-    throw GradleException("JAMENDO_CLIENT_ID não encontrado. Coloque ele em local.properties or declare env var or -PJAMENDO_CLIENT_ID e POR FAVOR não de GIT PUSH NA FUCKIN API_KEY ")
-}
-
-
-
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)

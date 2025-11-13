@@ -37,12 +37,10 @@ fun AddMusicScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
 
-    // Launcher para abrir o picker de documentos (audio/*)
     val pickAudioLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.OpenDocument(),
         onResult = { uri ->
             if (uri != null) {
-                // Persiste permissão de leitura para a URI selecionada
                 try {
                     context.contentResolver.takePersistableUriPermission(
                         uri,
@@ -94,7 +92,6 @@ fun AddMusicScreen(
             modifier = Modifier.fillMaxWidth()
         )
 
-        // Botão para escolher arquivo de áudio
         Button(onClick = { pickAudioLauncher.launch(arrayOf("audio/*")) }, modifier = Modifier.fillMaxWidth()) {
             Text(text = if (uiState.audioUri == null) "Selecionar Arquivo de Áudio" else "Áudio Selecionado")
         }

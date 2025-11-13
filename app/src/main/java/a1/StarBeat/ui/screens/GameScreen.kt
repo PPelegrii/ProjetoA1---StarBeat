@@ -36,37 +36,24 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
-// Número de colunas do jogo
 private const val LANE_COUNT = 5
-// Altura da "zona de acerto" onde o jogador deve tocar
 private val HIT_ZONE_HEIGHT = 100.dp
-// O tamanho (altura) de cada bloco que cai
 private val BLOCK_HEIGHT = 50.dp
 
-/**
- * A tela principal do jogo.
- *
- * @param songId O ID da música a ser carregada (passado pela navegação).
- * @param viewModel O GameViewModel injetado (via ViewModelFactory).
- * @param onGameEnd Callback para ser chamado quando o jogo terminar (para navegar de volta).
- */
 @Composable
 fun GameScreen(
     songId: String,
     viewModel: GameViewModel,
     onGameEnd: () -> Unit
 ) {
-    // Coleta o UiState do ViewModel de forma segura
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    // 1. Efeito para carregar a música quando a tela é exibida pela primeira vez
     LaunchedEffect(songId) {
         if (uiState.gameStatus != GameStatus.PLAYING && uiState.gameStatus != GameStatus.GAMEOVER) {
             viewModel.loadSong(songId)
         }
     }
 
-    // 2. Efeito para parar o jogo e salvar o placar se o usuário sair da tela
     DisposableEffect(viewModel) {
         onDispose {
             if (uiState.gameStatus == GameStatus.PLAYING) {
@@ -78,17 +65,14 @@ fun GameScreen(
     BoxWithConstraints(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFF2E2E2E)) // Fundo escuro
+            .background(Color(0xFF2E2E2E))
     ) {
-        // Pega as dimensões da tela para calcular as posições
         val screenHeight = constraints.maxHeight.toFloat()
         val screenWidth = constraints.maxWidth.toFloat()
         val laneWidth = screenWidth / LANE_COUNT
 
-        // 3. Desenha as linhas que separam as colunas
         DrawLaneSeparators(laneWidth = laneWidth, screenHeight = screenHeight)
 
-        // 4. Desenha a "Zona de Acerto" (Hit Zone) clicável
         HitZone(
             laneCount = LANE_COUNT,
             onLaneTapped = { laneIndex ->
@@ -96,8 +80,6 @@ fun GameScreen(
             }
         )
 
-        // 5. Converte Dp em Px para cálculos de posição e desenha os blocos
-        // É necessário obter a densidade atual para fazer a conversão de Dp para Px
         val density = LocalDensity.current
         val hitZoneTopPx = with(density) { screenHeight - HIT_ZONE_HEIGHT.toPx() }
         val blockHeightPx = with(density) { BLOCK_HEIGHT.toPx() }
@@ -105,8 +87,6 @@ fun GameScreen(
 
 
         uiState.blocks.forEach { block ->
-            // Mapeia a posição Y (0.0 a 1.0) para a altura da tela em pixels
-            // O bloco "nasce" em 0.0 e "atinge" o alvo em 1.0
             val yPositionPx = block.yPosition * (hitZoneTopPx - blockHeightPx)
             val yPositionDp = with(density) { yPositionPx.toDp() }
 
@@ -116,25 +96,20 @@ fun GameScreen(
                 laneWidth = laneWidthDp
             )
         }
-        // 6. Desenha o placar e o nome da música
         GameOverlayUI(
             score = uiState.score,
             songTitle = uiState.currentSong?.title ?: "Carregando..."
         )
 
-        // 7. Mostra a tela de "Game Over"
         if (uiState.gameStatus == GameStatus.GAMEOVER) {
             GameOverOverlay(
                 finalScore = uiState.score,
-                onClose = onGameEnd // Usa o callback para navegar de volta
+                onClose = onGameEnd
             )
         }
     }
 }
 
-/**
- * Desenha as linhas verticais que separam as colunas.
- */
 @Composable
 private fun DrawLaneSeparators(laneWidth: Float, screenHeight: Float) {
     Canvas(modifier = Modifier.fillMaxSize()) {
@@ -150,9 +125,6 @@ private fun DrawLaneSeparators(laneWidth: Float, screenHeight: Float) {
     }
 }
 
-/**
- * Desenha a zona de acerto na parte inferior, que é clicável.
- */
 @Composable
 private fun BoxWithConstraintsScope.HitZone(
     laneCount: Int,
@@ -179,9 +151,6 @@ private fun BoxWithConstraintsScope.HitZone(
     }
 }
 
-/**
- * Um Composable para um único bloco caindo.
- */
 @Composable
 private fun FallingBlock(
     block: FallingBlock,
@@ -197,12 +166,8 @@ private fun FallingBlock(
     )
 }
 
-/**
- * Desenha o placar e o título da música.
- */
 @Composable
 private fun BoxWithConstraintsScope.GameOverlayUI(score: Int, songTitle: String) {
-    // Título da música
     Text(
         text = songTitle,
         modifier = Modifier
@@ -212,7 +177,6 @@ private fun BoxWithConstraintsScope.GameOverlayUI(score: Int, songTitle: String)
         fontSize = 16.sp
     )
 
-    // Placar
     Text(
         text = "Score: $score",
         modifier = Modifier
@@ -224,9 +188,6 @@ private fun BoxWithConstraintsScope.GameOverlayUI(score: Int, songTitle: String)
     )
 }
 
-/**
- * A tela escura que aparece quando o jogo termina.
- */
 @Composable
 private fun GameOverOverlay(finalScore: Int, onClose: () -> Unit) {
     Box(
