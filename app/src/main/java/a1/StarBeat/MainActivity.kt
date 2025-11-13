@@ -43,7 +43,7 @@ class MainActivity : ComponentActivity() {
             StarBeatTheme {
                 val navController = rememberNavController()
 
-                // Collect current user id from repository to pass to BottomBar
+                // Collect current user id from repository to pass to BottomBar and AppNavigation
                 val currentUserId by repository.currentUserId.collectAsState(initial = null)
 
                 // Observe current route to decide whether to show the BottomBar
@@ -66,6 +66,7 @@ class MainActivity : ComponentActivity() {
                     AppNavigation(
                         navController = navController,
                         factory = factory,
+                        currentUserId = currentUserId,
                         modifier = Modifier.padding(innerPadding)
                     )
                 }

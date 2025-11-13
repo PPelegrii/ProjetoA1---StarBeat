@@ -106,4 +106,14 @@ class LibraryViewModel(
             }
         }
     }
+
+    fun toggleFavorite(songId: String) {
+        viewModelScope.launch {
+            try {
+                repository.toggleFavorite(songId)
+            } catch (e: Exception) {
+                _error.value = "Falha ao atualizar favorito: ${e.message}"
+            }
+        }
+    }
 }

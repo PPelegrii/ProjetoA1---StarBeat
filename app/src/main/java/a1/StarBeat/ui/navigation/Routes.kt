@@ -1,11 +1,5 @@
 package a1.StarBeat.ui.navigation
 
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.List
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.ui.graphics.vector.ImageVector
-
 /**
  * Define as rotas de navegação da aplicação.
  */
@@ -15,6 +9,7 @@ object AppRoutes {
     const val GAME = "game/{songId}"
     const val ADDMUSIC = "addmusic"
     const val PROFILE = "profile/{userId}"
+    const val LOGIN = "login"
 
     // Função helper para navegar para o jogo com o ID
     fun gameRoute(songId: String) = "game/$songId"

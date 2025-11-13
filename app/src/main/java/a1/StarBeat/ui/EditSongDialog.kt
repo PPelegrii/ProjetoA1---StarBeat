@@ -32,13 +32,16 @@ import androidx.compose.ui.unit.dp
  * @param song A entidade SongEntity atual a ser editada.
  * @param onDismiss Callback para fechar o diálogo.
  * @param onUpdate Callback chamado com a SongEntity atualizada para salvar no Room.
+ * @param onDelete Callback para deletar a música.
+ * @param toggleFavorite Opcional: callback para alternar favorito diretamente (default: no-op).
  */
 @Composable
 fun EditSongDialog(
     song: SongEntity,
     onDismiss: () -> Unit,
     onUpdate: (SongEntity) -> Unit,
-    onDelete: (SongEntity) -> Unit
+    onDelete: (SongEntity) -> Unit,
+    toggleFavorite: (SongEntity) -> Unit = {} // parâmetro opcional adicionado
 ) {
     // Estado local para o novo BPM, inicializado com o valor atual
     var newBpm by remember { mutableStateOf(song.bpm.toString()) }
@@ -104,7 +107,10 @@ fun EditSongDialog(
                             bpm = newBpm.toInt(),
                             isFavorite = isFavorite
                         )
-                        onUpdate(updatedSong) // Chama o ViewModel para persistir
+                        onUpdate(updatedSong)
+                        if (song.isFavorite != isFavorite) {
+                            toggleFavorite(song)
+                        }
                     }
                 },
                 enabled = isBpmValid // Só habilita se o BPM for válido

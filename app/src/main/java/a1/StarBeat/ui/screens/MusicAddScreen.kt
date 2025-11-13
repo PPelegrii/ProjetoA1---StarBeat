@@ -1,7 +1,11 @@
 package a1.StarBeat.ui.screens
 
 import a1.StarBeat.ui.viewmodels.AddMusicViewModel
+import android.content.Intent
+import android.net.Uri
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -24,6 +28,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.core.net.toUri
 
 @Composable
 fun AddMusicScreen(
@@ -31,6 +36,23 @@ fun AddMusicScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
+
+    // Launcher para abrir o picker de documentos (audio/*)
+    val pickAudioLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenDocument(),
+        onResult = { uri ->
+            if (uri != null) {
+                // Persiste permissão de leitura para a URI selecionada
+                try {
+                    context.contentResolver.takePersistableUriPermission(
+                        uri,
+                        Intent.FLAG_GRANT_READ_URI_PERMISSION
+                    )
+                } catch (_: SecurityException) { /* ignore */ }
+                viewModel.onAudioUriSelected(uri.toString())
+            }
+        }
+    )
 
     LaunchedEffect(uiState.saveSuccess) {
         if (uiState.saveSuccess) {
@@ -49,8 +71,6 @@ fun AddMusicScreen(
             style = MaterialTheme.typography.headlineMedium,
             fontWeight = FontWeight.Bold
         )
-
-        Text("Cadastre uma música manualmente. O jogo usará o BPM informado para gerar as notas.")
 
         OutlinedTextField(
             value = uiState.title,
@@ -73,6 +93,15 @@ fun AddMusicScreen(
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
             modifier = Modifier.fillMaxWidth()
         )
+
+        // Botão para escolher arquivo de áudio
+        Button(onClick = { pickAudioLauncher.launch(arrayOf("audio/*")) }, modifier = Modifier.fillMaxWidth()) {
+            Text(text = if (uiState.audioUri == null) "Selecionar Arquivo de Áudio" else "Áudio Selecionado")
+        }
+
+        uiState.audioUri?.let {
+            Text(text = "Arquivo: ${it.toUri().lastPathSegment ?: it}", maxLines = 1)
+        }
 
         Spacer(Modifier.height(8.dp))
 

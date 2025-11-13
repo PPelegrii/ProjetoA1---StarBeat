@@ -24,6 +24,7 @@ interface SongDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertSongLocal(song: SongEntity)
 
+
     @Query("SELECT * FROM songs WHERE isLocal = 0")
     fun getApiSongs(): Flow<List<SongEntity>>
 

@@ -8,7 +8,6 @@ import a1.StarBeat.data.local.entities.UserSongFavoriteCrossRef
 import a1.StarBeat.data.local.entities.UserWithFavoriteSongs
 import a1.StarBeat.data.preferences.UserPreferences
 import a1.StarBeat.data.remote.JamendoApiService
-import a1.StarBeat.data.remote.TrackDta
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -84,16 +83,22 @@ class GameRepository(
 
     // Combina as músicas da API com as músicas locais cadastradas
     val allSongs: Flow<List<SongEntity>> =
-        songDao.getApiSongs().combine(songDao.getLocalSongs()) { api, local ->
-            api + local
+        songDao.getLocalSongs().combine(songDao.getApiSongs()) { local, api ->
+            // Coloca músicas locais primeiro e remove duplicatas por songId (prioriza local)
+            val map = linkedMapOf<String, SongEntity>()
+            local.forEach { map[it.songId] = it }
+            api.forEach { if (!map.containsKey(it.songId)) map[it.songId] = it }
+            map.values.toList()
         }
 
     // Busca as relações de favoritos apenas para o usuário logado
+    @OptIn(ExperimentalCoroutinesApi::class)
     val favoriteRelations: Flow<List<UserSongFavoriteCrossRef>> = currentUserId.flatMapLatest { userId ->
         if (userId == null) flowOf(emptyList()) else songDao.getFavoriteRelationsForUser(userId)
     }
 
     // Busca as músicas favoritas apenas para o usuário logado
+    @OptIn(ExperimentalCoroutinesApi::class)
     fun getFavoriteSongs(): Flow<UserWithFavoriteSongs?> = currentUserId.flatMapLatest { userId ->
         if (userId == null) flowOf(null) else songDao.getFavoriteSongsForUser(userId)
     }
@@ -103,7 +108,7 @@ class GameRepository(
      */
     suspend fun toggleFavorite(songId: String) = withContext(Dispatchers.IO) {
         // Pega o ID do usuário logado no momento da ação
-        val userId = currentUserId.first() ?: return@withContext
+        val userId = currentUserId.first() ?: throw Exception("Usuário não autenticado")
 
         val favorite = UserSongFavoriteCrossRef(userId = userId, songId = songId)
 
@@ -118,12 +123,12 @@ class GameRepository(
     /**
      * Salva uma nova música cadastrada manualmente pelo usuário.
      */
-    suspend fun saveLocalSong(title: String, artist: String, bpm: Int) = withContext(Dispatchers.IO) {
+    suspend fun saveLocalSong(title: String, artist: String, bpm: Int, audioUri: String) = withContext(Dispatchers.IO) {
         val newSong = SongEntity(
             songId = java.util.UUID.randomUUID().toString(),
             title = title,
             artistName = artist,
-            audioPreviewUrl = "local", // Indica que é uma música local
+            audioPreviewUrl = audioUri, // armazena a URI do arquivo local (content://... ou file://...)
             bpm = bpm,
             isLocal = true,
             creatorUserId = currentUserId.first() ?: 0 // usuario logado no momento ou 0

@@ -33,6 +33,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -40,10 +41,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import android.widget.Toast
 
 /**
  * Tela principal: Biblioteca de Músicas e Placar.
@@ -56,6 +59,14 @@ fun LibraryScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val songs = uiState.songs
     val highScores = uiState.highScores
+    val context = LocalContext.current
+
+    // show error toasts
+    LaunchedEffect(uiState.error) {
+        uiState.error?.let { msg ->
+            Toast.makeText(context, msg, Toast.LENGTH_LONG).show()
+        }
+    }
 
     // ESTADO PARA O DIÁLOGO: Controla qual SongEntity deve ser editada (ou null)
     var songToEdit by remember { mutableStateOf<SongEntity?>(null) }
@@ -72,7 +83,8 @@ fun LibraryScreen(
             onDelete = { updatedSong ->
                 viewModel.deleteSong(updatedSong) // Persiste as mudanças
                 songToEdit = null // Fecha o diálogo após o salvamento
-            }
+            },
+            toggleFavorite = { s -> viewModel.toggleFavorite(s.songId) }
         )
     }
 
@@ -104,7 +116,7 @@ fun LibraryScreen(
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        // Exibição de Erros
+        // Exibição de Erros (agora via Toast)
         if (uiState.error != null) {
             Text(
                 text = "ERRO: ${uiState.error}",
@@ -144,6 +156,7 @@ fun LibraryScreen(
                         song = song,
                         onPlay = onSongSelected,
                         onEdit = { songToEdit = song }, // Ação: Abre o diálogo
+                        onToggleFavorite = { viewModel.toggleFavorite(song.songId) }
                     )
                 }
             }
@@ -196,6 +209,7 @@ private fun SongListItem(
     song: SongEntity,
     onPlay: (String) -> Unit,
     onEdit: () -> Unit,
+    onToggleFavorite: () -> Unit,
 ) {
     Row(
         modifier = Modifier
@@ -216,7 +230,16 @@ private fun SongListItem(
             )
         }
 
-        // NOVO: Botão de Edição que chama o onEdit
+        // Favorito: mostra ícone preenchido se isFavorite == true, senão o contorno
+        IconButton(onClick = onToggleFavorite) {
+            if (song.isFavorite) {
+                Icon(Icons.Default.Favorite, contentDescription = "Favorito", tint = Color.Red)
+            } else {
+                Icon(Icons.Default.FavoriteBorder, contentDescription = "Marcar favorito")
+            }
+        }
+
+        // Botão de Edição que chama o onEdit
         IconButton(onClick = onEdit) {
             Icon(
                 imageVector = Icons.Default.Edit,

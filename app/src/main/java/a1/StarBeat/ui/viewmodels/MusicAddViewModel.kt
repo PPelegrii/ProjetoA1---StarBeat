@@ -13,6 +13,7 @@ data class AddMusicUiState(
     val title: String = "",
     val artist: String = "",
     val bpm: String = "", // BPM como String para o TextField
+    val audioUri: String? = null, // URI selecionada
     val isLoading: Boolean = false,
     val error: String? = null,
     val saveSuccess: Boolean = false
@@ -37,6 +38,9 @@ class AddMusicViewModel(
         _uiState.update { it.copy(bpm = bpm, error = null, saveSuccess = false) }
     }
 
+    fun onAudioUriSelected(uri: String?) {
+        _uiState.update { it.copy(audioUri = uri, error = null, saveSuccess = false) }
+    }
     fun saveSong() {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null, saveSuccess = false) }
@@ -44,18 +48,18 @@ class AddMusicViewModel(
             val state = _uiState.value
             val bpmInt = state.bpm.toIntOrNull()
 
-            if (state.title.isBlank() || state.artist.isBlank() || bpmInt == null || bpmInt <= 0) {
+            if (state.title.isBlank() || state.artist.isBlank() || bpmInt == null || bpmInt <= 0 || state.audioUri.isNullOrBlank()) {
                 _uiState.update {
                     it.copy(
                         isLoading = false,
-                        error = "Preencha todos os campos com valores válidos."
+                        error = "Preencha todos os campos e selecione um arquivo de áudio."
                     )
                 }
                 return@launch
             }
 
             try {
-                repository.saveLocalSong(state.title, state.artist, bpmInt)
+                repository.saveLocalSong(state.title, state.artist, bpmInt, state.audioUri)
                 _uiState.value = AddMusicUiState(saveSuccess = true) // Reseta o formulário
             } catch (e: Exception) {
                 _uiState.update { it.copy(isLoading = false, error = e.message) }
